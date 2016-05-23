@@ -1,3 +1,10 @@
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -8,7 +15,7 @@
  *
  * @author gabriel
  */
-public class NetworkTestForm extends javax.swing.JFrame {
+public class NetworkTestForm extends javax.swing.JFrame implements Runnable{
 
     /**
      * Creates new form NetworkTestForm
@@ -26,21 +33,68 @@ public class NetworkTestForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        lblPort = new javax.swing.JLabel();
+        combPort = new javax.swing.JComboBox();
+        btStart = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        txtPane = new javax.swing.JTextArea();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        lblPort.setText("Port:");
+
+        combPort.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "1010", "8080", "8084", "9090" }));
+        combPort.setSelectedIndex(2);
+
+        btStart.setText("Start");
+        btStart.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btStartActionPerformed(evt);
+            }
+        });
+
+        txtPane.setColumns(20);
+        txtPane.setRows(5);
+        jScrollPane2.setViewportView(txtPane);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(lblPort)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(combPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btStart)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblPort)
+                    .addComponent(combPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btStart))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btStartActionPerformed
+        // TODO add your handling code here:
+        Thread t = new Thread(this);
+        t.start();
+    }//GEN-LAST:event_btStartActionPerformed
 
     /**
      * @param args the command line arguments
@@ -78,5 +132,28 @@ public class NetworkTestForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btStart;
+    private javax.swing.JComboBox combPort;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JLabel lblPort;
+    private javax.swing.JTextArea txtPane;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void run() {
+        try {
+            ServerSocket ss = new ServerSocket(Integer.parseInt(combPort.getSelectedItem().toString()));
+            Socket s = ss.accept();
+            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+            PrintWriter out = new PrintWriter(s.getOutputStream(), true);
+            String line;
+            while((line = in.readLine()) != null){
+                txtPane.append(line + "\n");
+                out.println(line);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();            
+        }
+    }
+    
 }

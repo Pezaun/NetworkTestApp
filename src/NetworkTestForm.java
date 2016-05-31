@@ -37,7 +37,10 @@ public class NetworkTestForm extends javax.swing.JFrame implements Runnable{
         combPort = new javax.swing.JComboBox();
         btStart = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
-        txtPane = new javax.swing.JTextArea();
+        txtReceive = new javax.swing.JTextArea();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        txtSend = new javax.swing.JTextArea();
+        btSend = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -53,9 +56,22 @@ public class NetworkTestForm extends javax.swing.JFrame implements Runnable{
             }
         });
 
-        txtPane.setColumns(20);
-        txtPane.setRows(5);
-        jScrollPane2.setViewportView(txtPane);
+        txtReceive.setColumns(20);
+        txtReceive.setRows(5);
+        jScrollPane2.setViewportView(txtReceive);
+
+        txtSend.setColumns(20);
+        txtSend.setRows(5);
+        txtSend.setText("HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nServer: Feevale Test\nConnection: close\n\num\ndois\ntres\n");
+        jScrollPane1.setViewportView(txtSend);
+
+        btSend.setText("Send");
+        btSend.setEnabled(false);
+        btSend.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btSendActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -64,14 +80,18 @@ public class NetworkTestForm extends javax.swing.JFrame implements Runnable{
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 562, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(lblPort)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(combPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btStart)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btSend)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -83,7 +103,11 @@ public class NetworkTestForm extends javax.swing.JFrame implements Runnable{
                     .addComponent(combPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btStart))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 129, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btSend)
                 .addContainerGap())
         );
 
@@ -96,6 +120,31 @@ public class NetworkTestForm extends javax.swing.JFrame implements Runnable{
         t.start();
     }//GEN-LAST:event_btStartActionPerformed
 
+    private void btSendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btSendActionPerformed
+        // TODO add your handling code here:
+        out.print(txtSend.getText());
+        out.flush();
+    }//GEN-LAST:event_btSendActionPerformed
+
+    @Override
+    public void run() {
+        try {
+            ServerSocket ss = new ServerSocket(Integer.parseInt(combPort.getSelectedItem().toString()));
+            btStart.setEnabled(false);
+            Socket s = ss.accept();
+            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+            out = new PrintWriter(s.getOutputStream(), true);
+            btSend.setEnabled(true);
+            String line;
+            while((line = in.readLine()) != null){
+                txtReceive.append(line + "\n");
+                out.println(line);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();            
+        }
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -132,28 +181,15 @@ public class NetworkTestForm extends javax.swing.JFrame implements Runnable{
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btSend;
     private javax.swing.JButton btStart;
     private javax.swing.JComboBox combPort;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lblPort;
-    private javax.swing.JTextArea txtPane;
+    private javax.swing.JTextArea txtReceive;
+    private javax.swing.JTextArea txtSend;
     // End of variables declaration//GEN-END:variables
-
-    @Override
-    public void run() {
-        try {
-            ServerSocket ss = new ServerSocket(Integer.parseInt(combPort.getSelectedItem().toString()));
-            Socket s = ss.accept();
-            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-            PrintWriter out = new PrintWriter(s.getOutputStream(), true);
-            String line;
-            while((line = in.readLine()) != null){
-                txtPane.append(line + "\n");
-                out.println(line);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();            
-        }
-    }
+    private PrintWriter out;
     
 }
